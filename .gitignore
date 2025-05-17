@@ -1,0 +1,48 @@
+## Build output
+/bin/
+//obj/
+
+## Avalonia Designer cache (optional, if exists)
+/.avalonia/
+
+## Rider / JetBrains / VSCode / VS
+.idea/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+## NuGet packages (if using packages folder)
+/packages/
+/*.nupkg
+project.lock.json
+project.fragment.lock.json
+
+## Logs and crash dumps
+*.log
+*.dmp
+
+## VS backup files
+*.bak
+*.orig
+
+## User-specific files
+*.sln.docstates
+*.dbmdl
+
+## OS-specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+## Avalonia-generated intermediate assets
+**/refint/
+**/ref/
+**/resources/
+
+## Others
+*.pdb
+*.cache
+*.tmp
+*.csproj.FileListAbsolute.txt
