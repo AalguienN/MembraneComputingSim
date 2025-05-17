@@ -7,5 +7,16 @@
         xmlns:local="clr-namespace:MCSim"
         x:DataType="local:MainWindowViewModel"
         Title="MCSim">
-    First commit!
+    <Grid ColumnDefinitions="Auto,*" >
+        <StackPanel  Grid.Column="0" Background="#f0111111">
+            <Button Content="Run" Command="{Binding TestCommand}"/>
+        </StackPanel>
+
+
+        <ScrollViewer x:Name="MCSConsoleScroller" Grid.Column="1">
+            <TextBox x:Name="MCSConsoleTextBox"/>
+        </ScrollViewer>
+
+    </Grid>
+
 </Window>
