@@ -10,6 +10,6 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = new MainWindowViewModel();
-        MCSConsole.Init(tb: MCSConsoleTextBox, sv: MCSConsoleScroller);
+        MCConsole.Init(tb: MCSConsoleTextBox, sv: MCSConsoleScroller);
     }
 }

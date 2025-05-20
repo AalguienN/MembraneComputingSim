@@ -7,12 +7,12 @@ using ReactiveUI;
 
 namespace MCSim.Console;
 
-public class MCSConsole : ReactiveObject
+public class MCConsole : ReactiveObject
 {
 
     #region Variables
     private static int maxLength = 500;
-    private static string logFilePath = "/consoleLogs/MCSConsole_output.log";
+    private static string logFilePath = "./consoleLogs/MCSConsole_output.log";
 
     public static TextBox? textBox { get; set; }
     public static ScrollViewer? scrollViewer { get; set; }
@@ -21,8 +21,8 @@ public class MCSConsole : ReactiveObject
     public static void Init(TextBox tb, ScrollViewer sv)
     {
 
-        MCSConsole.textBox = tb;
-        MCSConsole.scrollViewer = sv;
+        MCConsole.textBox = tb;
+        MCConsole.scrollViewer = sv;
         textBox.Text = "------------------------------------\n" +
                             "Welcome to MCSim 🧫⚙ v0.1\n" +
                             "------------------------------------\n";
@@ -82,7 +82,7 @@ public class MCSConsole : ReactiveObject
         catch (Exception)
         {
 
-            MCSConsole.WriteLog($"{s}:Cant write {s} into text box.\n");
+            MCConsole.WriteLog($"{s}:Cant write {s} into text box.\n");
 
         }
     }
