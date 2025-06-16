@@ -8,14 +8,52 @@
         x:DataType="local:MainWindowViewModel"
         Title="MCSim">
     <Grid ColumnDefinitions="Auto,*" >
-        <StackPanel  Grid.Column="0" Background="#f0111111">
+        <StackPanel  Grid.Column="0">
             <Button Content="Run" Command="{Binding TestCommand}"/>
         </StackPanel>
 
+        <Grid RowDefinitions="2*,*" Grid.Column="1">
+            <Viewbox Stretch="Uniform" Grid.Column="0">
+                <!-- <Ellipse Width="50" Height="50" Fill="CornflowerBlue" />  
+                 -->
+                <Border>
+                    <WrapPanel x:Name="CellsPanel">
+                        <!-- <Border Classes="card" Margin="10">
+                            <WrapPanel>
+                                <Border Classes="card" Margin="10">
+                                    <WrapPanel>
+                                        <Border Classes="card" Margin="10">
+                                            <WrapPanel>
+                                            </WrapPanel>
+                                        </Border>
+                                        <Border Classes="card" Margin="10">
+                                            <WrapPanel>
+                                            </WrapPanel>
+                                        </Border>
+                                        <Border Classes="card" Margin="10">
+                                            <WrapPanel>
+                                            </WrapPanel>
+                                        </Border>
+                                        <Border Classes="card" Margin="10">
+                                            <WrapPanel>
+                                            </WrapPanel>
+                                        </Border>
+                                    </WrapPanel>
+                                </Border>
+                                <Border Classes="card" Margin="10">
+                                    <WrapPanel>
+                                    </WrapPanel>
+                                </Border>
+                            </WrapPanel>
+                        </Border> -->
+                    </WrapPanel>
+                </Border>
+            </Viewbox>
+            <TextBox x:Name="MCSConsoleTextBox" Grid.Row="1"/>
+            <!-- <ScrollViewer x:Name="MCSConsoleScroller" Grid.Row="1"> -->
+            <!-- </ScrollViewer> -->
+        </Grid>
 
-        <ScrollViewer x:Name="MCSConsoleScroller" Grid.Column="1">
-            <TextBox x:Name="MCSConsoleTextBox"/>
-        </ScrollViewer>
 
     </Grid>
 

@@ -6,10 +6,22 @@ namespace MCSim;
 
 public partial class MainWindow : Window
 {
+    public static MainWindow? Instance;
+    private MainWindowViewModel viewModel;
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel();
-        MCConsole.Init(tb: MCSConsoleTextBox, sv: MCSConsoleScroller);
+        viewModel = new MainWindowViewModel();
+        DataContext = viewModel;
+        MCConsole.Init(tb: MCSConsoleTextBox);
+        Instance = this;
+    }
+
+    public void DrawCells()
+    {
+        CellsPanel.Children.Clear();
+        PSystem pSystem = viewModel.PSystem;
+
+        
     }
 }

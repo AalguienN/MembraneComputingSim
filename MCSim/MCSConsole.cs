@@ -15,14 +15,12 @@ public class MCConsole : ReactiveObject
     private static string logFilePath = "./consoleLogs/MCSConsole_output.log";
 
     public static TextBox? textBox { get; set; }
-    public static ScrollViewer? scrollViewer { get; set; }
     #endregion
 
-    public static void Init(TextBox tb, ScrollViewer sv)
+    public static void Init(TextBox tb)
     {
 
         MCConsole.textBox = tb;
-        MCConsole.scrollViewer = sv;
         textBox.Text = "------------------------------------\n" +
                             "Welcome to MCSim 🧫⚙ v0.1\n" +
                             "------------------------------------\n";
@@ -98,11 +96,6 @@ public class MCConsole : ReactiveObject
                 i++;
             }
             textBox.Text = textBox.Text.Remove(0, i + 1);
-        }
-
-        if (scrollViewer != null)
-        {
-            scrollViewer.ScrollToEnd();
         }
     }
 

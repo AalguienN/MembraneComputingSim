@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Metadata;
 using MCSim.Console;
+using MCSim.Utils;
 
 namespace MCSim;
 
@@ -11,7 +13,9 @@ public class PSystem
     public List<char> alfabeto;
 
     //Estructura membranas
-    public List<Membrane> membranas;
+    public Membrane rootMembranas;
+
+    public Dictionary<int, Membrane> membDict;
     //Falta definir las membranas
 
     //Cadenas iniciales en cada membrana
@@ -35,16 +39,37 @@ public class PSystem
         MCConsole.WriteLine($" · Reglas: {string.Join(" ", reglas)}");
 
         MCConsole.WriteLine($" · Prioridades: {string.Join(", ", cadenasIniciales)}");
+        membDict = new Dictionary<int, Membrane>();
 
-        Membrane m = new Membrane(
+        this.alfabeto = alfabeto;
+        rootMembranas = new Membrane(
             ps: this,
-            ci: cadenasIniciales[0],
+            ki: 0,
+            ci: null,
             r: new List<Tuple<string, string>>
             {
                 new Tuple<string,string>("","")
             }
         );
 
-        m.LogState();
+        rootMembranas.MakeChildrenFromString(estructuraMembranas);
+        SetContentAll(cadenasIniciales);
+        rootMembranas.LogState();
+    }
+
+    private void SetContentAll(List<string> Contenido)
+    {
+        foreach (int k in membDict.Keys.Order())
+        {
+            if (k == 0) continue;
+            if (membDict.Keys.Contains(k))
+            {
+                membDict[k].contenido = Contenido[k - 1];
+            }
+            else
+            {
+                MCConsole.WriteLine($"{k} not in keys: {membDict.Keys.Count}");
+            }
+        }
     }
 }

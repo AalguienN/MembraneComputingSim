@@ -14,11 +14,14 @@ public class MainWindowViewModel : ReactiveObject
     {
         TestCommand = ReactiveCommand.Create(Test);
     }
-    
+
+    private PSystem _pSystem;
+    public PSystem PSystem { get => _pSystem; set => this.RaiseAndSetIfChanged(ref _pSystem, value); }
+
     public void Test()
     {
-        _ = new PSystem(alfabeto: new List<char> { 'a', 'b', 'c' },
-                            estructuraMembranas: "[1[2][3[4]]]",
+        var pSystem = new PSystem(alfabeto: new List<char> { 'a', 'b', 'c' },
+                            estructuraMembranas: "[1[2]2[3[4]4]3]1",
                             cadenasIniciales: new List<string> { "ab", "aaa", "bbbb", "c" },
                             reglas: new List<System.Tuple<int, string, string>> {
                                     new Tuple<int,string,string>(1,"",""),
@@ -28,5 +31,8 @@ public class MainWindowViewModel : ReactiveObject
                                 },
                             prioridades: new List<Tuple<int, int>>()
                         );
+
+        if (MainWindow.Instance != null)
+            pSystem.rootMembranas.DrawTree(MainWindow.Instance.CellsPanel);
     }
 }
