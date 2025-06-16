@@ -15,6 +15,8 @@ public class MainWindowViewModel : ReactiveObject
 
     public ReactiveCommand<Unit, Unit> AddCadenaCommand { get; }
     public ReactiveCommand<Unit, Unit> RemoveCadenaCommand { get; }
+    public ReactiveCommand<Unit, Unit> AddReglaCommand { get; }
+    public ReactiveCommand<Unit, Unit> RemoveReglaCommand { get; }
 
     private string _alfabeto;
     public string Alfabeto { get => _alfabeto; set => this.RaiseAndSetIfChanged(ref _alfabeto, value); }
@@ -37,6 +39,13 @@ public class MainWindowViewModel : ReactiveObject
         {
             if (CadenasIniciales.Any())
                 CadenasIniciales.RemoveAt(CadenasIniciales.Count - 1);
+        });
+
+        AddReglaCommand = ReactiveCommand.Create(() => Reglas.Add(new DefinicionRegla(1, "","")));
+        RemoveReglaCommand = ReactiveCommand.Create(() =>
+        {
+            if (Reglas.Any())
+                Reglas.RemoveAt(CadenasIniciales.Count - 1);
         });
 
         _alfabeto = "abc";
