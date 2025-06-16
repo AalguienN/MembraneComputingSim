@@ -25,6 +25,9 @@ public class MainWindowViewModel : ReactiveObject
     private ObservableCollection<CadenaInicial> _cadenasIniciales;
     public ObservableCollection<CadenaInicial> CadenasIniciales { get => _cadenasIniciales; set => this.RaiseAndSetIfChanged(ref _cadenasIniciales, value); }
 
+    private ObservableCollection<DefinicionRegla> _reglas;
+    public ObservableCollection<DefinicionRegla> Reglas { get => _reglas; set => this.RaiseAndSetIfChanged(ref _reglas, value); }
+
     public MainWindowViewModel()
     {
         TestCommand = ReactiveCommand.Create(Init);
@@ -44,7 +47,13 @@ public class MainWindowViewModel : ReactiveObject
             .Select((val, i) => new CadenaInicial(val, i))
         );
 
-
+        _reglas = new ObservableCollection<DefinicionRegla>()
+        { 
+            new DefinicionRegla(1,"a","aa"),
+            new DefinicionRegla(2,"b","ab"),
+            new DefinicionRegla(3,"c","a"),
+            new DefinicionRegla(4,"b","a"),
+        };
     }
 
     private PSystem? _pSystem;
@@ -56,16 +65,11 @@ public class MainWindowViewModel : ReactiveObject
         List<char> _alf = Alfabeto.ToCharArray().ToList();
         string _estrMem = EstructuraMembranas;
         List<string> _cadIni = CadenasIniciales.Select(ci => (string)ci).ToList();
-
+        List<Tuple<int, string, string>> _reg = Reglas.Select(ri => Tuple.Create(ri.M, ri.Input, ri.Output)).ToList();
         PSystem = new PSystem(alfabeto: _alf,
                             estructuraMembranas: _estrMem,
                             cadenasIniciales: _cadIni,
-                            reglas: new List<System.Tuple<int, string, string>> {
-                                    new Tuple<int,string,string>(1,"a","aa"),
-                                    new Tuple<int,string,string>(2,"b","ab"),
-                                    new Tuple<int,string,string>(3,"c","a"),
-                                    new Tuple<int,string,string>(4,"b","a"),
-                                },
+                            reglas: _reg,
                             prioridades: new List<Tuple<int, int>>()
                         );
 
@@ -101,7 +105,7 @@ public class CadenaInicial : ReactiveObject
     public CadenaInicial(string valor = "", int index = 0)
     {
         this._valor = valor;
-        this.index = index;
+        this.index = index+1;
     }
 
     // Conversión implícita: string → CadenaInicial

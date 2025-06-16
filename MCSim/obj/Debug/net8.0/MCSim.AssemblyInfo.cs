@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MCSim")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+acacc13be88f92a4543e284e0ac6c09454990170")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+01aaf1435e05c752ecad7e18e1af0051472dfb14")]
 [assembly: System.Reflection.AssemblyProductAttribute("MCSim")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MCSim")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -8,36 +8,56 @@
         x:DataType="local:MainWindowViewModel"
         Title="MCSim">
     <Grid ColumnDefinitions="Auto,*" >
-        <StackPanel  Grid.Column="0">
-            <Button Content="Initialize" Command="{Binding TestCommand}"/>
-            <Button Content="Step" Command="{Binding StepCommand}"/>
+        <StackPanel  Grid.Column="0" Background="#DDDDDD">
+            <Button Content="Initialize" Command="{Binding TestCommand}" HorizontalAlignment="Stretch"/>
+            <Button Content="Step" Command="{Binding StepCommand}" HorizontalAlignment="Stretch"/>
 
-            <TextBlock Text="Alfabeto:" FontWeight="Bold"/>
+            <TextBlock Text="Alfabeto:" FontWeight="Bold" Margin="0,20,0,0"/>
             <TextBox Text="{Binding Alfabeto, Mode=TwoWay}" />
 
-            <TextBlock Text="Estructura de membranas:" FontWeight="Bold"/>
+            <TextBlock Text="Estructura de membranas:" FontWeight="Bold" Margin="0,20,0,0"/>
             <TextBox Text="{Binding EstructuraMembranas, Mode=TwoWay}" />
 
 
-            <TextBlock Text="Cadenas Iniciales:" FontWeight="Bold"/>
+            <TextBlock Text="Cadenas Iniciales:" FontWeight="Bold" Margin="0,20,0,0"/>
 
-            <ListBox ItemsSource="{Binding CadenasIniciales}">
+            <ListBox ItemsSource="{Binding CadenasIniciales}" MaxHeight="200">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="{Binding index}" Width="24"/>
-                            <TextBox Text="{Binding Valor, Mode=TwoWay}" Width="100"/>
-                        </StackPanel>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Text="{Binding index}" Width="24" Grid.Column="0" VerticalAlignment="Center"/>
+                            <TextBox Text="{Binding Valor, Mode=TwoWay}" Grid.Column="1"/>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <Grid  ColumnDefinitions="*,*">
+                <Button Grid.Column="0" Content="+" Margin="0" Command="{Binding AddCadenaCommand}" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="1" Content="–" Command="{Binding RemoveCadenaCommand}" HorizontalAlignment="Stretch"/>
+            </Grid>
 
+            <TextBlock Text="Reglas:" FontWeight="Bold" Margin="0,20,0,0"/>
 
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Content="+" Width="30" Margin="0,0,5,0" Command="{Binding AddCadenaCommand}"/>
-                <Button Content="–" Width="30" Command="{Binding RemoveCadenaCommand}"/>
-            </StackPanel>
+            <Grid ColumnDefinitions="*,*,*">
+                            <TextBlock Text="Memb." Grid.Column="0"/>
+                            <TextBlock Text="Input" Grid.Column="1"/>
+                            <TextBlock Text="Output" Grid.Column="2"/>
+            </Grid>
+            <ListBox ItemsSource="{Binding Reglas}" MaxHeight="200">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*,*,*">
+                            <TextBox Text="{Binding M, Mode=TwoWay}" Grid.Column="0"/>
+                            <TextBox Text="{Binding Input, Mode=TwoWay}" Grid.Column="1"/>
+                            <TextBox Text="{Binding Output, Mode=TwoWay}" Grid.Column="2"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Grid  ColumnDefinitions="*,*">
+                <Button Grid.Column="0" Content="+" Margin="0" Command="{Binding AddCadenaCommand}" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="1" Content="–" Command="{Binding RemoveCadenaCommand}" HorizontalAlignment="Stretch"/>
+            </Grid>
 
         </StackPanel>
 
