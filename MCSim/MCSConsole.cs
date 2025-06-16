@@ -37,7 +37,8 @@ public class MCConsole : ReactiveObject
         string cleaned = RemoveSpecialSymbols(text);
 
         AddToTextBox(cleaned);
-        WriteLog(cleaned);
+
+        // WriteLog(cleaned);
     }
 
     public static void Clear() { if (textBox != null) textBox.Text = ""; }
@@ -74,14 +75,17 @@ public class MCConsole : ReactiveObject
         try
         {
             if (textBox != null && textBox.Text != null)
+            { 
                 textBox.Text += s;
-            LimitLetters();
+                textBox.CaretIndex = textBox.Text.Length;
+                LimitLetters();
+            }
         }
         catch (Exception)
         {
 
             MCConsole.WriteLog($"{s}:Cant write {s} into text box.\n");
-
+    
         }
     }
 

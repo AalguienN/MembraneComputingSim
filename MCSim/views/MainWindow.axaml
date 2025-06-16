@@ -9,49 +9,46 @@
         Title="MCSim">
     <Grid ColumnDefinitions="Auto,*" >
         <StackPanel  Grid.Column="0">
-            <Button Content="Run" Command="{Binding TestCommand}"/>
+            <Button Content="Initialize" Command="{Binding TestCommand}"/>
+            <Button Content="Step" Command="{Binding StepCommand}"/>
+
+            <TextBlock Text="Alfabeto:" FontWeight="Bold"/>
+            <TextBox Text="{Binding Alfabeto, Mode=TwoWay}" />
+
+            <TextBlock Text="Estructura de membranas:" FontWeight="Bold"/>
+            <TextBox Text="{Binding EstructuraMembranas, Mode=TwoWay}" />
+
+
+            <TextBlock Text="Cadenas Iniciales:" FontWeight="Bold"/>
+
+            <ListBox ItemsSource="{Binding CadenasIniciales}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{Binding index}" Width="24"/>
+                            <TextBox Text="{Binding Valor, Mode=TwoWay}" Width="100"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Button Content="+" Width="30" Margin="0,0,5,0" Command="{Binding AddCadenaCommand}"/>
+                <Button Content="–" Width="30" Command="{Binding RemoveCadenaCommand}"/>
+            </StackPanel>
+
         </StackPanel>
 
         <Grid RowDefinitions="2*,*" Grid.Column="1">
             <Viewbox Stretch="Uniform" Grid.Column="0">
-                <!-- <Ellipse Width="50" Height="50" Fill="CornflowerBlue" />  
-                 -->
                 <Border>
                     <WrapPanel x:Name="CellsPanel">
-                        <!-- <Border Classes="card" Margin="10">
-                            <WrapPanel>
-                                <Border Classes="card" Margin="10">
-                                    <WrapPanel>
-                                        <Border Classes="card" Margin="10">
-                                            <WrapPanel>
-                                            </WrapPanel>
-                                        </Border>
-                                        <Border Classes="card" Margin="10">
-                                            <WrapPanel>
-                                            </WrapPanel>
-                                        </Border>
-                                        <Border Classes="card" Margin="10">
-                                            <WrapPanel>
-                                            </WrapPanel>
-                                        </Border>
-                                        <Border Classes="card" Margin="10">
-                                            <WrapPanel>
-                                            </WrapPanel>
-                                        </Border>
-                                    </WrapPanel>
-                                </Border>
-                                <Border Classes="card" Margin="10">
-                                    <WrapPanel>
-                                    </WrapPanel>
-                                </Border>
-                            </WrapPanel>
-                        </Border> -->
                     </WrapPanel>
                 </Border>
             </Viewbox>
-            <TextBox x:Name="MCSConsoleTextBox" Grid.Row="1"/>
-            <!-- <ScrollViewer x:Name="MCSConsoleScroller" Grid.Row="1"> -->
-            <!-- </ScrollViewer> -->
+            <TextBox x:Name="MCSConsoleTextBox" Grid.Row="1" Margin="20"/>
         </Grid>
 
 
