@@ -19,7 +19,7 @@
     <Style Selector="Border.card">
         <Setter Property="BorderBrush" Value="#000"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="CornerRadius" Value="10"/>
         <Setter Property="Margin" Value="0,15,20,20"/>
         <Setter Property="Background" Value="WhiteSmoke"/>
         <Setter Property="ClipToBounds" Value="True"/>

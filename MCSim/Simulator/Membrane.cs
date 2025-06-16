@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Avalonia.Controls;
+using Avalonia.Media;
 using MCSim.Console;
 
 namespace MCSim;
@@ -115,7 +116,7 @@ public class Membrane
         };
         WrapPanel wp = new WrapPanel();
         StackPanel sp = new StackPanel();
-        sp.Children.Add(new TextBlock() { Text=key.ToString()});
+        sp.Children.Add(new TextBlock() { Text=key.ToString(), Foreground=Brushes.Red});
         sp.Children.Add(new TextBlock() { Text=contenido});
         wp.Children.Add(sp);
         foreach (var child in Children)

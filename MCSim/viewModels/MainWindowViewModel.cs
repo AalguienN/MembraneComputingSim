@@ -33,6 +33,9 @@ public class MainWindowViewModel : ReactiveObject
                         );
 
         if (MainWindow.Instance != null)
+        {
+            MainWindow.Instance.CellsPanel.Children.Clear();
             pSystem.rootMembranas.DrawTree(MainWindow.Instance.CellsPanel);
+        }
     }
 }
