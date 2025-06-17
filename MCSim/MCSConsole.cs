@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using ReactiveUI;
 
-namespace MCSim.Console;
+namespace MCSim.MCConsole;
 
 public class MCConsole : ReactiveObject
 {
@@ -105,14 +105,14 @@ public class MCConsole : ReactiveObject
 
     public static void WriteLog(string text)
     {
-        try
-        {
-            File.AppendAllText(logFilePath, text);
-        }
-        catch (Exception ex)
-        {
-            System.Console.WriteLine($"Failed to write to log file: {ex.Message}");
-        }
+        // try
+        // {
+        //     File.AppendAllText(logFilePath, text);
+        // }
+        // catch (Exception ex)
+        // {
+        //     System.Console.WriteLine($"Failed to write to log file: {ex.Message}");
+        // }
     }
     #endregion
 }

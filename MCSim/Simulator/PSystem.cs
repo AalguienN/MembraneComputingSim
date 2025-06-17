@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using MCSim.Console;
+using MCSim.MCConsole;
 
 namespace MCSim;
 
@@ -32,17 +33,17 @@ public class PSystem
         List<Tuple<int, int>> prioridades          // (reglaMayor, reglaMenor)
     )
     {
-        MCConsole.WriteLine("\n Incializando PSystem:");
+        MCConsole.MCConsole.WriteLine("\n Incializando PSystem:");
 
-        MCConsole.WriteLine($" · Alfabeto: {string.Join(", ", alfabeto)}");
+        MCConsole.MCConsole.WriteLine($" · Alfabeto: {string.Join(", ", alfabeto)}");
 
-        MCConsole.WriteLine($" · Estructura: {estructuraMembranas}");
+        MCConsole.MCConsole.WriteLine($" · Estructura: {estructuraMembranas}");
 
-        MCConsole.WriteLine($" · Cadenas iniciales: {string.Join(", ", cadenasIniciales)}");
+        MCConsole.MCConsole.WriteLine($" · Cadenas iniciales: {string.Join(", ", cadenasIniciales)}");
 
-        MCConsole.WriteLine($" · Reglas: {string.Join(" ", reglas)}");
+        MCConsole.MCConsole.WriteLine($" · Reglas: {string.Join(" ", reglas)}");
 
-        MCConsole.WriteLine($" · Prioridades: {string.Join(", ", cadenasIniciales)}");
+        MCConsole.MCConsole.WriteLine($" · Prioridades: {string.Join(", ", cadenasIniciales)}");
         membDict = new Dictionary<int, Membrane>();
 
         this.alfabeto = alfabeto;
@@ -69,17 +70,37 @@ public class PSystem
             }
             else
             {
-                MCConsole.WriteLine($"{k} not in keys: {membDict.Keys.Count}");
+                MCConsole.MCConsole.WriteLine($"{k} not in keys: {membDict.Keys.Count}");
             }
         }
     }
+
+    public static string DictToString(Dictionary<char,int> dict)
+    {
+        // Cada entrada la formatea "a:3", "b:5", ...
+        var parts = dict.Select(kv => $"{kv.Key}:{kv.Value}");
+        // Une con comas y espacios
+        return "{" + string.Join(", ", parts) + "}";
+    }
+
+    public static string CountsString(Dictionary<char, int> dict)
+    {
+        string res = "";
+        foreach ((char key, int value) in dict)
+        {
+            for (int i = 0; i < value; i++)
+                res += key;
+        }
+        return res;
+    }
+
 
     private void SetRulesAll(List<Tuple<int, string, string, string, string, int, bool>> reglas)
     {
         List<Regla> _reglas = new List<Regla>();
         foreach ((int k, string i, string _h, string _i, string _o, int _priority, bool _isDissolution) in reglas)
         {
-            if (i == "" || (_h == "" && _i == "" && _o == "")) continue;
+            if (i == "") continue;
             if (membDict.Keys.Contains(k))
             {
                 Regla reg = new Regla(membDict[k], i, _h, _i, _o, priority: _priority, isDissolution: _isDissolution);
@@ -88,7 +109,7 @@ public class PSystem
             }
             else
             {
-                MCConsole.WriteLine($"{k} not in keys: {membDict.Keys.Count}");
+                MCConsole.MCConsole.WriteLine($"{k} not in keys: {membDict.Keys.Count}");
             }
         }
 
@@ -161,11 +182,22 @@ public class PSystem
             if (topGroup == null)
                 continue;
 
+            var rand = new Random();
+            var reglasBarajadas = topGroup
+                .OrderBy(r => rand.Next())
+                .ToList();
+
             // construimos el mults para este nivel
             var avail = BuildMultiset(mem.contenido);
-            foreach (var r in topGroup)
+            foreach (var r in reglasBarajadas)
             {
-                if (!r.CanExecute(mem.contenido))
+                string s = CountsString(avail);
+                Console.WriteLine("------");
+                Console.WriteLine(s);
+                Console.WriteLine("------");
+
+
+                if (!r.CanExecute(s))
                     continue;
 
                 if (r.IsDissolution)
@@ -173,19 +205,26 @@ public class PSystem
                     // disolución: sólo una vez
                     mults[r] = 1;
                     toDissolve.Add(mem);
+                    
+                    Console.WriteLine("------ DISOLUCIÓN ------");
+                    Console.WriteLine(s);
+                    Console.WriteLine("------");
                 }
-                else
+
+                // calcular cuántas veces cabe input(r)
+                int k = int.MaxValue;
+                foreach (var grp in r.input.GroupBy(c => c))
                 {
-                    // calcular cuántas veces cabe input(r)
-                    int k = int.MaxValue;
-                    foreach (var grp in r.input.GroupBy(c => c))
-                    {
-                        int have = avail.TryGetValue(grp.Key, out var cnt) ? cnt : 0;
-                        k = Math.Min(k, have / grp.Count());
-                    }
-                    if (k > 0)
-                        mults[r] = k;
+                    int have = avail.TryGetValue(grp.Key, out var cnt) ? cnt : 0;
+                    k = Math.Min(k, have / grp.Count());
                 }
+                if (k > 0)
+                { 
+                    mults[r] = k;
+                    foreach (var grp in r.input.GroupBy(c => c))
+                        avail[grp.Key] -= grp.Count() * k;
+                }
+                
             }
         }
 
@@ -210,7 +249,6 @@ public class PSystem
             if (r.IsDissolution)
             {
                 LastExecutedRules.Add($"δ@{mem.Id}");
-                continue;
             }
 
             // log de la regla
@@ -272,6 +310,8 @@ public class PSystem
         // Paso 5: finalmente ejecutar las disoluciones
         foreach (var mem in toDissolve.ToList())
         {
+            Console.WriteLine("VVVVVVVVVVVVVVVV");
+            Console.WriteLine(mem.contenido);
             // la disolución mueve contenido e hijos al padre y elimina la membrana
             mem.Dissolve();
         }

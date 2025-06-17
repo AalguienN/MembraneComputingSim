@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using MCSim.Console;
+using MCSim.MCConsole;
 using ReactiveUI;
 
 namespace MCSim;
@@ -97,6 +97,7 @@ public class MainWindowViewModel : ReactiveObject
 
     public void Init()
     {
+        steps = 0;
         ExecutedRules.Clear();
         List<char> _alf = Alfabeto.ToCharArray().ToList();
         string _estrMem = EstructuraMembranas;

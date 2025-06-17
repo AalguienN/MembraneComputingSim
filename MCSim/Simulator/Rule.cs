@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using MCSim;
-using MCSim.Console;
+using MCSim.MCConsole;
 using ReactiveUI;
 
 public class Regla
@@ -31,7 +31,8 @@ public class Regla
     {
         string tin = t_in != "" ? $"({t_in})in" : "";
         string tout = t_out != "" ? $"({t_out})out" : "";
-        return $"{input}->{t_here} {tin} {tout}";
+        string diss = IsDissolution ? $"δ" : "";
+        return $"{input}->{t_here} {tin} {tout} {diss}";
     }
 
     public bool CanExecute()
@@ -41,7 +42,7 @@ public class Regla
 
     public bool CanExecute(string s)
     {
-        if (input == "" || (t_here == "" && t_in == "" && t_out == "")) return false;
+        if (input == "") return false;
         var availiable = new Dictionary<char, int>();
         foreach (char c in s)
         {

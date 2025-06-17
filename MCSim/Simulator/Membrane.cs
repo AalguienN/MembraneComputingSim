@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Avalonia.Controls;
 using Avalonia.Media;
-using MCSim.Console;
+using MCSim.MCConsole;
 
 namespace MCSim;
 
@@ -58,7 +58,7 @@ public class Membrane
         {
             if (r.CanExecute())
             {
-                MCConsole.WriteLine($"{Id} - \t{r}: {r.membrane.Id}{r.CanExecute()}");
+                MCConsole.MCConsole.WriteLine($"{Id} - \t{r}: {r.membrane.Id}{r.CanExecute()}");
                 r.Execute();
                 break;
             }
@@ -67,9 +67,9 @@ public class Membrane
 
     public void LogState()
     {
-        MCConsole.WriteLine("----------------");
+        MCConsole.MCConsole.WriteLine("----------------");
         PrintTree(0);
-        MCConsole.WriteLine("----------------");
+        MCConsole.MCConsole.WriteLine("----------------");
     }
 
     public void MakeChildrenFromString(string s)
@@ -212,8 +212,31 @@ public class Membrane
     }
 
 
+    public void Dissolve(string cont)
+    { 
+        if (Parent == null) return;  // la piel no se disuelve
+
+        Parent.contenido += cont;
+
+        // 2) Reparentar los hijos
+        foreach (var hijo in Children)
+        {
+            hijo.Parent = Parent;
+            Parent.Children.Add(hijo);
+        }
+
+        // 3) Quitar esta membrana del padre
+        Parent.Children.Remove(this);
+
+        // 4) Eliminar del diccionario global
+        psystem.membDict.Remove(this.Id);
+    }
+
+    private bool isDisolved = false;
+
     public void Dissolve()
     {
+        if (isDisolved) return;
         if (Parent == null) return;  // la piel no se disuelve
 
         // 1) Mover el contenido (sin procesar) a la membrana padre
@@ -231,13 +254,14 @@ public class Membrane
 
         // 4) Eliminar del diccionario global
         psystem.membDict.Remove(this.Id);
+        isDisolved = true;
     }
 
 
     public void PrintTree(int indent = 0)
     {
         string indentation = new string(' ', indent * 2);
-        MCConsole.WriteLine($"{indentation}- Membrana: {Id} {{Content: {contenido}}}");
+        MCConsole.MCConsole.WriteLine($"{indentation}- Membrana: {Id} {{Content: {contenido}}}");
 
         foreach (var child in Children)
         {

@@ -1,6 +1,6 @@
 using System;
 using Avalonia.Controls;
-using MCSim.Console;
+using MCSim.MCConsole;
 
 namespace MCSim;
 
@@ -13,7 +13,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         viewModel = new MainWindowViewModel();
         DataContext = viewModel;
-        MCConsole.Init(tb: MCSConsoleTextBox);
+        MCConsole.MCConsole.Init(tb: MCSConsoleTextBox);
         Instance = this;
     }
 }
