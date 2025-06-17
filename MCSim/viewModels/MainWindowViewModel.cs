@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Threading.Tasks;
 using MCSim.Console;
 using ReactiveUI;
 
@@ -30,10 +31,35 @@ public class MainWindowViewModel : ReactiveObject
     private ObservableCollection<DefinicionRegla> _reglas;
     public ObservableCollection<DefinicionRegla> Reglas { get => _reglas; set => this.RaiseAndSetIfChanged(ref _reglas, value); }
 
+    private int steps = 0;
+
+    private ObservableCollection<string> _executedRules = new();
+    public ObservableCollection<string> ExecutedRules
+    {
+        get => _executedRules;
+        set => this.RaiseAndSetIfChanged(ref _executedRules, value);
+    }
+
+    public enum ExecutionMode
+    {
+        Secuencial,
+        Máximo_Paralelo
+    }
+    
+    public IReadOnlyList<ExecutionMode> ExecutionModes { get; } =
+        Enum.GetValues<ExecutionMode>().ToList();
+
+    private ExecutionMode _selectedMode = ExecutionMode.Secuencial;
+    public ExecutionMode SelectedMode
+    {
+        get => _selectedMode;
+        set => this.RaiseAndSetIfChanged(ref _selectedMode, value);
+    }
+
     public MainWindowViewModel()
     {
         TestCommand = ReactiveCommand.Create(Init);
-        StepCommand = ReactiveCommand.Create(Step);
+        StepCommand = ReactiveCommand.CreateFromTask(Step);
         AddCadenaCommand = ReactiveCommand.Create(() => CadenasIniciales.Add(new CadenaInicial("", CadenasIniciales.Count)));
         RemoveCadenaCommand = ReactiveCommand.Create(() =>
         {
@@ -41,11 +67,11 @@ public class MainWindowViewModel : ReactiveObject
                 CadenasIniciales.RemoveAt(CadenasIniciales.Count - 1);
         });
 
-        AddReglaCommand = ReactiveCommand.Create(() => Reglas.Add(new DefinicionRegla(1, "","")));
+        AddReglaCommand = ReactiveCommand.Create(() => Reglas.Add(new DefinicionRegla(1, "", "", "", "", 1)));
         RemoveReglaCommand = ReactiveCommand.Create(() =>
         {
             if (Reglas.Any())
-                Reglas.RemoveAt(CadenasIniciales.Count - 1);
+                Reglas.RemoveAt(Reglas.Count - 1);
         });
 
         _alfabeto = "abc";
@@ -57,11 +83,12 @@ public class MainWindowViewModel : ReactiveObject
         );
 
         _reglas = new ObservableCollection<DefinicionRegla>()
-        { 
-            new DefinicionRegla(1,"a","aa"),
-            new DefinicionRegla(2,"b","ab"),
-            new DefinicionRegla(3,"c","a"),
-            new DefinicionRegla(4,"b","a"),
+        {
+            new DefinicionRegla(1,"a","aa","2:a;","a",1),
+            new DefinicionRegla(2,"b","bb","","",1),
+            new DefinicionRegla(2,"bb","b","","",1),
+            new DefinicionRegla(3,"c","a","","",1),
+            new DefinicionRegla(4,"b","a","","",1),
         };
     }
 
@@ -70,11 +97,10 @@ public class MainWindowViewModel : ReactiveObject
 
     public void Init()
     {
-
         List<char> _alf = Alfabeto.ToCharArray().ToList();
         string _estrMem = EstructuraMembranas;
         List<string> _cadIni = CadenasIniciales.Select(ci => (string)ci).ToList();
-        List<Tuple<int, string, string>> _reg = Reglas.Select(ri => Tuple.Create(ri.M, ri.Input, ri.Output)).ToList();
+        List<Tuple<int, string, string, string, string, int>> _reg = Reglas.Select(ri => Tuple.Create(ri.M, ri.Input, ri.T_Here,ri.T_in,ri.T_out, ri.Priority)).ToList();
         PSystem = new PSystem(alfabeto: _alf,
                             estructuraMembranas: _estrMem,
                             cadenasIniciales: _cadIni,
@@ -89,14 +115,41 @@ public class MainWindowViewModel : ReactiveObject
         }
     }
 
-    public void Step()
+    private bool executing;
+
+    public async Task Step()
     {
-        PSystem?.MakeStep();
+        if (executing) return;
+
+        executing = true;
+        if (PSystem == null) return;
+
+        steps++;
+
+        await Task.Run(() =>
+        {
+            if (SelectedMode == ExecutionMode.Secuencial)
+                PSystem.MakeStep();
+            else
+                PSystem.MakeParallelStep();
+        });
+
+
+        // ExecutedRules.Clear();
+        ExecutedRules.Add($"Step: {steps}");
+        foreach (var txt in PSystem.LastExecutedRules)
+            ExecutedRules.Add(txt);
+
+        MainWindow.Instance?.ScrollRules.ScrollToEnd();
+        // ExecutedRules.Add("\n");
+
+
         if (MainWindow.Instance != null && PSystem != null)
         {
             MainWindow.Instance.CellsPanel.Children.Clear();
             PSystem.rootMembranas.DrawTree(MainWindow.Instance.CellsPanel, first: true);
         }
+        executing = false;
     }
 }
 
@@ -117,9 +170,7 @@ public class CadenaInicial : ReactiveObject
         this.index = index+1;
     }
 
-    // Conversión implícita: string → CadenaInicial
     public static implicit operator CadenaInicial(string s) => new CadenaInicial(s);
 
-    // Conversión implícita: CadenaInicial → string
     public static implicit operator string(CadenaInicial ci) => ci.Valor;
 }

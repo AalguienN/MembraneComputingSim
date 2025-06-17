@@ -16,12 +16,4 @@ public partial class MainWindow : Window
         MCConsole.Init(tb: MCSConsoleTextBox);
         Instance = this;
     }
-
-    public void DrawCells()
-    {
-        CellsPanel.Children.Clear();
-        PSystem pSystem = viewModel.PSystem;
-
-        
-    }
 }

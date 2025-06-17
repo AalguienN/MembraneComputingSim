@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json.Serialization;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -11,20 +12,22 @@ namespace MCSim;
 public class Membrane
 {
     [JsonIgnore]
+
     public PSystem psystem;
 
-    public string contenido;
+    public string contenido = "";
 
-    public int key;
+    public int Id;
 
     public List<Regla> reglas;
 
+    public Membrane? Parent;
     public List<Membrane> Children { get; set; }
 
     public Membrane(PSystem ps, int ki, string? ci, List<Regla>? r)
     {
         psystem = ps;
-        key = ki;
+        Id = ki;
         
         if (ci != null)
             contenido = ci;
@@ -33,7 +36,7 @@ public class Membrane
         else reglas = new List<Regla>();
         Children = new List<Membrane>();
 
-        ps.membDict[key] = this;
+        ps.membDict[Id] = this;
     }
 
     public List<Regla> GetAvaliableRules()
@@ -55,7 +58,7 @@ public class Membrane
         {
             if (r.CanExecute())
             {
-                MCConsole.WriteLine($"{key} - \t{r}: {r.membrane.key}{r.CanExecute()}");
+                MCConsole.WriteLine($"{Id} - \t{r}: {r.membrane.Id}{r.CanExecute()}");
                 r.Execute();
                 break;
             }
@@ -113,7 +116,7 @@ public class Membrane
                 int membraneKey = int.Parse(openingLabelStr);
                 string innerChildren = fullInner.Substring(openingLabelStr.Length);
 
-                var child = new Membrane(psystem, membraneKey, "", new List<Regla>());
+                var child = new Membrane(psystem, membraneKey, "", new List<Regla>()) { Parent = this};
                 child.MakeChildrenFromString(innerChildren);
                 Children.Add(child);
 
@@ -134,22 +137,58 @@ public class Membrane
         while (i < s.Length && char.IsDigit(s[i])) i++;
         return s.Substring(0, i);
     }
+    
+    public static string AbreviarRepeticionesGlobal(string s, int threshold = 5)
+    {
+        if (string.IsNullOrEmpty(s))
+            return s;
+
+        // 1) Contar frecuencias
+        var freq = new Dictionary<char,int>();
+        // 2) Mantener orden de primera aparición
+        var order = new List<char>();
+        foreach (var c in s)
+        {
+            if (!freq.ContainsKey(c))
+            {
+                freq[c] = 0;
+                order.Add(c);
+            }
+            freq[c]++;
+        }
+
+        // 3) Construir resultado
+        var sb = new StringBuilder();
+        foreach (var c in order)
+        {
+            int count = freq[c];
+            if (count > threshold)
+                sb.AppendFormat("{0}({1})\n", c, count);
+            else
+                sb.Append(new string(c, count));
+        }
+
+        return sb.ToString();
+    }
 
     public void DrawTree(Panel parent, bool first = false)
     {
         WrapPanel wp = new WrapPanel();
         StackPanel sp = new StackPanel();
-        sp.Children.Add(new TextBlock() { Text = key.ToString(), Foreground = Brushes.Blue });
+        sp.Children.Add(new TextBlock() { Text = Id.ToString(), Foreground = Brushes.Blue });
+
         foreach (Regla r in this.reglas)
         {
+            string s;
+            r.ValidateTIn(out s);
             sp.Children.Add(new TextBlock()
             {
-                Text = r.ToString(),
+                Text = r.ToString() + $"\n{s}",
                 TextWrapping = TextWrapping.Wrap,
-                Foreground = r.CanExecute() ? Brushes.Green : Brushes.Red
+                Foreground = r.ValidateTIn(out _) ? (r.CanExecute() ? Brushes.Green : Brushes.Red) : Brushes.Purple
             });
         }
-        sp.Children.Add(new TextBlock() { Text = contenido, MaxWidth=100, TextWrapping=TextWrapping.Wrap });
+        sp.Children.Add(new TextBlock() { Text = AbreviarRepeticionesGlobal(contenido), MaxWidth = 100, TextWrapping = TextWrapping.Wrap });
         wp.Children.Add(sp);
         foreach (var child in Children)
         {
@@ -175,7 +214,7 @@ public class Membrane
     public void PrintTree(int indent = 0)
     {
         string indentation = new string(' ', indent * 2);
-        MCConsole.WriteLine($"{indentation}- Membrana: {key} {{Content: {contenido}}}");
+        MCConsole.WriteLine($"{indentation}- Membrana: {Id} {{Content: {contenido}}}");
 
         foreach (var child in Children)
         {
