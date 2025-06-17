@@ -34,11 +34,12 @@
             <TextBlock Text="Reglas:" FontWeight="Bold" Margin="0,10,0,0" FontSize="20"/>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 
@@ -48,6 +49,7 @@
                 <TextBlock Text="In" Grid.Column="3" />
                 <TextBlock Text="Out" Grid.Column="4" />
                 <TextBlock Text="Priority" Grid.Column="5" />
+                <TextBlock Text="δ" Grid.Column="6" />
             </Grid>
 
             <!-- Lista de reglas -->
@@ -62,14 +64,16 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Text="{Binding M, Mode=TwoWay}" Grid.Column="0" HorizontalAlignment="Stretch"/>
-                            <TextBox Text="{Binding Input, Mode=TwoWay}" Grid.Column="1" HorizontalAlignment="Stretch"/>
-                            <TextBox Text="{Binding T_Here, Mode=TwoWay}" Grid.Column="2" HorizontalAlignment="Stretch"/>
-                            <TextBox Text="{Binding T_in, Mode=TwoWay}" Grid.Column="3" HorizontalAlignment="Stretch"/>
-                            <TextBox Text="{Binding T_out, Mode=TwoWay}" Grid.Column="4" HorizontalAlignment="Stretch"/>
-                            <TextBox Text="{Binding Priority, Mode=TwoWay}" Grid.Column="5" HorizontalAlignment="Stretch"/>
+                            <TextBox Text="{Binding M, Mode=TwoWay}" Grid.Column="0" />
+                            <TextBox Text="{Binding Input, Mode=TwoWay}" Grid.Column="1" />
+                            <TextBox Text="{Binding T_Here, Mode=TwoWay}" Grid.Column="2" />
+                            <TextBox Text="{Binding T_in, Mode=TwoWay}" Grid.Column="3" />
+                            <TextBox Text="{Binding T_out, Mode=TwoWay}" Grid.Column="4" />
+                            <TextBox Text="{Binding Priority, Mode=TwoWay}" Grid.Column="5" />
+                            <CheckBox Grid.Column="6" IsChecked="{Binding IsDissolution, Mode=TwoWay}"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -79,7 +83,8 @@
                 <Button Grid.Column="1" Content="–" Command="{Binding RemoveReglaCommand}" HorizontalAlignment="Stretch"/>
             </Grid>
 
-            <Panel  HorizontalAlignment="Stretch" Background="#55AA55">
+            <Panel  HorizontalAlignment="Stretch"> 
+            <!-- Background="#55AA55"> -->
                 <Button Content="Crear sistema ➕" Command="{Binding TestCommand}" HorizontalAlignment="Stretch"/>
             </Panel>
 

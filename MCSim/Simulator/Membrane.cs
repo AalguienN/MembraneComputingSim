@@ -181,11 +181,12 @@ public class Membrane
         {
             string s;
             r.ValidateTIn(out s);
+            if (r.ValidateTIn(out _))
             sp.Children.Add(new TextBlock()
             {
                 Text = r.ToString() + $"\n{s}",
                 TextWrapping = TextWrapping.Wrap,
-                Foreground = r.ValidateTIn(out _) ? (r.CanExecute() ? Brushes.Green : Brushes.Red) : Brushes.Purple
+                Foreground = r.CanExecute() ? Brushes.Green : Brushes.Red
             });
         }
         sp.Children.Add(new TextBlock() { Text = AbreviarRepeticionesGlobal(contenido), MaxWidth = 100, TextWrapping = TextWrapping.Wrap });
@@ -208,6 +209,28 @@ public class Membrane
         {
             parent.Children.Add(wp);
         }
+    }
+
+
+    public void Dissolve()
+    {
+        if (Parent == null) return;  // la piel no se disuelve
+
+        // 1) Mover el contenido (sin procesar) a la membrana padre
+        Parent.contenido += contenido;
+
+        // 2) Reparentar los hijos
+        foreach (var hijo in Children)
+        {
+            hijo.Parent = Parent;
+            Parent.Children.Add(hijo);
+        }
+
+        // 3) Quitar esta membrana del padre
+        Parent.Children.Remove(this);
+
+        // 4) Eliminar del diccionario global
+        psystem.membDict.Remove(this.Id);
     }
 
 

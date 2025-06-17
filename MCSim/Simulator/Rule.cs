@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using MCSim;
+using MCSim.Console;
 using ReactiveUI;
 
 public class Regla
@@ -14,7 +15,8 @@ public class Regla
     public string t_in { get; set; }
     public string t_out { get; set; }
     public int Priority {get;set;}
-    public Regla(Membrane m, string input, string t_here = "", string t_in = "", string t_out = "", int priority = 1)
+    public bool IsDissolution {get;set;}
+    public Regla(Membrane m, string input, string t_here = "", string t_in = "", string t_out = "", int priority = 1, bool isDissolution = false)
     {
         this.membrane = m;
         this.input = input;
@@ -22,6 +24,7 @@ public class Regla
         this.t_in = t_in;
         this.t_out = t_out;
         this.Priority = priority;
+        this.IsDissolution = isDissolution;
     }
 
     public override string ToString()
@@ -103,6 +106,14 @@ public class Regla
         lista.AddRange(t_here);
 
         membrane.contenido = new string(lista.ToArray());
+
+        if (IsDissolution)
+        {
+            // Opcional: loguear el evento de disolución
+            membrane.psystem.LastExecutedRules.Add($"δ@{membrane.Id}");
+            membrane.Dissolve();
+            return;
+        }
     }
     
 
@@ -134,6 +145,7 @@ public class Regla
             if (!existe)
             {
                 errorMessage = $"No existe membrana hija con Id={targetId} para segmento «{segmento}».";
+                MCConsole.WriteLine($"No existe membrana hija con Id={targetId} para segmento «{segmento}».");
                 return false;
             }
         }
@@ -157,8 +169,11 @@ public class DefinicionRegla : ReactiveObject
     public string T_out { get => _t_out; set => this.RaiseAndSetIfChanged(ref _t_out, value); }
     private int _priority;
     public int Priority { get => _priority; set => this.RaiseAndSetIfChanged(ref _priority, value); }
+    private bool _isDissolution;
+    public bool IsDissolution { get => _isDissolution; set => this.RaiseAndSetIfChanged(ref _isDissolution, value); }
 
-    public DefinicionRegla(int m, string input, string t_here, string t_in, string t_out, int priority)
+
+    public DefinicionRegla(int m, string input, string t_here, string t_in, string t_out, int priority, bool isDissolution)
     {
         this._m = m;
         this._input = input;
@@ -166,12 +181,13 @@ public class DefinicionRegla : ReactiveObject
         this._t_in = t_in;
         this._t_out = t_out;
         this._priority = priority;
+        this._isDissolution = isDissolution;
     }
 
     // Conversión implícita: Tuple → DefinicionRegla
-    public static implicit operator DefinicionRegla((int n, string i, string _h, string _i, string _o, int _priority) tuple)
-        => new DefinicionRegla(tuple.n, tuple.i, tuple._h, tuple._i, tuple._o, tuple._priority);
+    public static implicit operator DefinicionRegla((int n, string i, string _h, string _i, string _o, int _priority, bool _isDissolution) tuple)
+        => new DefinicionRegla(tuple.n, tuple.i, tuple._h, tuple._i, tuple._o, tuple._priority, tuple._isDissolution);
 
     // Conversión implícita: CadenaInicial → string
-    public static implicit operator Tuple<int,string,string,string,string,int>(DefinicionRegla d) => new Tuple<int, string, string, string, string, int>(d.M,d.Input,d.T_Here,d.T_in,d.T_out,d._priority);
+    public static implicit operator Tuple<int,string,string,string,string,int,bool>(DefinicionRegla d) => new Tuple<int, string, string, string, string, int, bool>(d.M,d.Input,d.T_Here,d.T_in,d.T_out,d._priority, d._isDissolution);
 }

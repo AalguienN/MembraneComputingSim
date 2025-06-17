@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using MCSim.Console;
@@ -27,7 +28,7 @@ public class PSystem
         List<char> alfabeto,
         string estructuraMembranas,
         List<string> cadenasIniciales,
-        List<Tuple<int, string, string, string, string, int>> reglas,  // (region, antecedente, consecuente)
+        List<Tuple<int, string, string, string, string, int, bool>> reglas,  // (region, antecedente, consecuente)
         List<Tuple<int, int>> prioridades          // (reglaMayor, reglaMenor)
     )
     {
@@ -73,15 +74,15 @@ public class PSystem
         }
     }
 
-    private void SetRulesAll(List<Tuple<int, string, string, string, string, int>> reglas)
+    private void SetRulesAll(List<Tuple<int, string, string, string, string, int, bool>> reglas)
     {
         List<Regla> _reglas = new List<Regla>();
-        foreach ((int k, string i, string _h, string _i, string _o, int _priority) in reglas)
+        foreach ((int k, string i, string _h, string _i, string _o, int _priority, bool _isDissolution) in reglas)
         {
             if (i == "" || (_h == "" && _i == "" && _o == "")) continue;
             if (membDict.Keys.Contains(k))
             {
-                Regla reg = new Regla(membDict[k], i, _h, _i, _o, priority: _priority);
+                Regla reg = new Regla(membDict[k], i, _h, _i, _o, priority: _priority, isDissolution: _isDissolution);
                 membDict[k].reglas.Add(reg);
                 _reglas.Add(reg);
             }
@@ -110,14 +111,16 @@ public class PSystem
 
     public void MakeStep()
     {
+        LastExecutedRules.Clear();
+        LastExecutedRules.Add("∅");
         var available = GetAvaliableRules();
         if (available.Count == 0)
             return;
+        LastExecutedRules.Clear();
 
         int idx = _rng.Next(available.Count);
         var r = available[idx];
 
-        LastExecutedRules.Clear();
 
         LastExecutedRules.Add(r.ToString());
 
@@ -142,133 +145,137 @@ public class PSystem
 
     public void MakeParallelStep()
     {
-        // Paso 1: calcular k_r para cada regla
-        // guardamos para cada regla su multiplicidad
-        var mults = new Dictionary<Regla, int>();
+        // Paso 1: calcular cuántas veces aplicar cada regla y cuáles membranas disolver
+        var mults = new Dictionary<Regla,int>();
+        var toDissolve = new List<Membrane>();
 
-        foreach (var mem in membDict.Values)
+        foreach (var mem in membDict.Values.ToList())
         {
-            // 1a. si usas prioridades, selecciona el primer nivel aplicable
+            // agrupamos reglas de esta membrana por nivel de prioridad
             var byLevel = mem.reglas
-                            .GroupBy(r => GetLevel(r))    // tu función que devuelve la prioridad numérica
-                            .OrderByDescending(g => g.Key)
-                            .ToList();
-            List<Regla> toApply;
-            if (byLevel.Count > 0)
-            {
-                toApply = new List<Regla>();
-                foreach (var group in byLevel)
-                {
-                    if (group.Any(r => r.CanExecute(mem.contenido)))
-                    {
-                        toApply = group.ToList();
-                        break;
-                    }
-                }
+                            .GroupBy(r => GetLevel(r))
+                            .OrderByDescending(g => g.Key);
 
-            }
-            else
-            {
-                toApply = new List<Regla>();
-            }
+            // elegimos el primer nivel que tenga alguna regla aplicable
+            var topGroup = byLevel.FirstOrDefault(g => g.Any(r => r.CanExecute(mem.contenido)));
+            if (topGroup == null)
+                continue;
 
-            // 1b. para cada regla r en toApply, computa k_r = máxima repeticiones
-            //    basándote en cuántas veces cabe input(r) en contenido
+            // construimos el mults para este nivel
             var avail = BuildMultiset(mem.contenido);
-            foreach (var r in toApply)
+            foreach (var r in topGroup)
             {
-                int k = int.MaxValue;
-                foreach (var c in r.input.GroupBy(ch => ch))
+                if (!r.CanExecute(mem.contenido))
+                    continue;
+
+                if (r.IsDissolution)
                 {
-                    char simbolo = c.Key;
-                    int req = c.Count();
-                    int have = avail.TryGetValue(simbolo, out var cnt) ? cnt : 0;
-                    k = Math.Min(k, have / req);
+                    // disolución: sólo una vez
+                    mults[r] = 1;
+                    toDissolve.Add(mem);
                 }
-                if (k > 0) mults[r] = k;
+                else
+                {
+                    // calcular cuántas veces cabe input(r)
+                    int k = int.MaxValue;
+                    foreach (var grp in r.input.GroupBy(c => c))
+                    {
+                        int have = avail.TryGetValue(grp.Key, out var cnt) ? cnt : 0;
+                        k = Math.Min(k, have / grp.Count());
+                    }
+                    if (k > 0)
+                        mults[r] = k;
+                }
             }
         }
 
-        // Preparamos estructuras para añadir/quitar
-        var removeCounts = new Dictionary<Membrane, Dictionary<char, int>>();
-        var addHere = new Dictionary<Membrane, List<char>>();
-        var addOut = new Dictionary<Membrane, List<char>>();
-        var addIn = new Dictionary<Membrane, List<(Membrane target, string str)>>();
+        // preparar estructuras para el efecto de las reglas no-disolución
+        var removeCounts = membDict.Values.ToDictionary(
+            m => m,
+            m => new Dictionary<char,int>());
 
-        foreach (var mem in membDict.Values)
-        {
-            removeCounts[mem] = new Dictionary<char, int>();
-            addHere[mem] = new List<char>();
-            addOut[mem] = new List<char>();
-            addIn[mem] = new List<(Membrane, string)>();
-        }
+        var addHere = membDict.Values.ToDictionary(m => m, m => new List<char>());
+        var addOut  = membDict.Values.ToDictionary(m => m, m => new List<char>());
+        var addIn   = membDict.Values.ToDictionary(m => m, m => new List<(Membrane,string)>());
 
         LastExecutedRules.Clear();
-        // Paso 2 y 3: distribuir efectos según k_r
+
+        // Paso 2 & 3: aplicar efectos de todas las reglas (excepto disolución)
         foreach (var kv in mults)
         {
             var r = kv.Key;
             int k = kv.Value;
-
-            if (k > 0)
-                LastExecutedRules.Add(r.ToString() + $"(x{k})");
-
             var mem = r.membrane;
 
-            // 2) acumula las restas
+            if (r.IsDissolution)
+            {
+                LastExecutedRules.Add($"δ@{mem.Id}");
+                continue;
+            }
+
+            // log de la regla
+            LastExecutedRules.Add(r.ToString() + (k > 1 ? $"(x{k})" : ""));
+
+            // 2) contabilizar consumo de input
             foreach (char c in r.input)
                 removeCounts[mem][c] = removeCounts[mem].GetValueOrDefault(c) + k;
 
-            // 3a) aquí
+            // 3a) añadir t_here k veces
             for (int i = 0; i < k; i++)
                 addHere[mem].AddRange(r.t_here);
 
-            // 3b) out
-            if (mem.Parent != null)
+            // 3b) output al padre k veces
+            if (mem.Parent != null && !string.IsNullOrEmpty(r.t_out))
                 for (int i = 0; i < k; i++)
                     addOut[mem.Parent].AddRange(r.t_out);
 
-            // 3c) in: parsea r.t_in "id:cad;..."
+            // 3c) distribuir t_in k veces
             for (int i = 0; i < k; i++)
             {
-                foreach (var segmento in r.t_in.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                if (string.IsNullOrWhiteSpace(r.t_in))
+                    break;
+
+                foreach (var seg in r.t_in.Split(';', StringSplitOptions.RemoveEmptyEntries))
                 {
-                    var partes = segmento.Split(':', 2);
+                    var partes = seg.Split(':', 2);
                     if (partes.Length != 2) continue;
-                    if (int.TryParse(partes[0], out var targetId))
-                    {
-                        var hija = mem.Children.FirstOrDefault(ch => ch.Id == targetId);
-                        if (hija != null)
-                            addIn[hija].Add((hija, partes[1]));
-                    }
+                    if (!int.TryParse(partes[0], out var targetId)) continue;
+                    var hija = mem.Children.FirstOrDefault(ch => ch.Id == targetId);
+                    if (hija != null)
+                        addIn[hija].Add((hija, partes[1]));
                 }
             }
         }
 
-        // Paso 4: aplicar quitas y puestas a cada membrana
-        foreach (var mem in membDict.Values)
+        // Paso 4: actualizar contenidos de cada membrana tras inputs/outputs y producción local
+        foreach (var mem in membDict.Values.ToList())
         {
             // 4a) quitar inputs
             var content = new List<char>(mem.contenido);
             foreach (var kv in removeCounts[mem])
-            {
                 for (int i = 0; i < kv.Value; i++)
                     content.Remove(kv.Key);
-            }
 
             // 4b) añadir t_here
             content.AddRange(addHere[mem]);
-
             mem.contenido = new string(content.ToArray());
 
-            // 4c) añadir salidas al padre
-            if (addOut.TryGetValue(mem, out var outs) && outs.Count > 0)
-                mem.contenido += new string(outs.ToArray());
+            // 4c) añadir outputs al padre
+            if (addOut[mem].Count > 0)
+                mem.contenido = mem.contenido + new string(addOut[mem].ToArray());
 
-            // 4d) añadir entradas de hijas
-            if (addIn.TryGetValue(mem, out var ins) && ins.Count > 0)
-                mem.contenido += string.Concat(ins.Select(t => t.str));
+            // 4d) añadir inputs desde hijas
+            if (addIn[mem].Count > 0)
+                mem.contenido += string.Concat(addIn[mem].Select(t => t.Item2));
+        }
+
+        // Paso 5: finalmente ejecutar las disoluciones
+        foreach (var mem in toDissolve.ToList())
+        {
+            // la disolución mueve contenido e hijos al padre y elimina la membrana
+            mem.Dissolve();
         }
     }
+
 
 }

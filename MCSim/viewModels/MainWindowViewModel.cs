@@ -67,7 +67,7 @@ public class MainWindowViewModel : ReactiveObject
                 CadenasIniciales.RemoveAt(CadenasIniciales.Count - 1);
         });
 
-        AddReglaCommand = ReactiveCommand.Create(() => Reglas.Add(new DefinicionRegla(1, "", "", "", "", 1)));
+        AddReglaCommand = ReactiveCommand.Create(() => Reglas.Add(new DefinicionRegla(1, "", "", "", "", 1,false)));
         RemoveReglaCommand = ReactiveCommand.Create(() =>
         {
             if (Reglas.Any())
@@ -84,11 +84,11 @@ public class MainWindowViewModel : ReactiveObject
 
         _reglas = new ObservableCollection<DefinicionRegla>()
         {
-            new DefinicionRegla(1,"a","aa","2:a;","a",1),
-            new DefinicionRegla(2,"b","bb","","",1),
-            new DefinicionRegla(2,"bb","b","","",1),
-            new DefinicionRegla(3,"c","a","","",1),
-            new DefinicionRegla(4,"b","a","","",1),
+            new DefinicionRegla(1,"a","aa","2:a;","a",1,false),
+            new DefinicionRegla(2,"b","bb","","",1,false),
+            new DefinicionRegla(2,"bb","b","","",1,false),
+            new DefinicionRegla(3,"c","a","","",1,false),
+            new DefinicionRegla(4,"b","a","","",1,false),
         };
     }
 
@@ -97,10 +97,11 @@ public class MainWindowViewModel : ReactiveObject
 
     public void Init()
     {
+        ExecutedRules.Clear();
         List<char> _alf = Alfabeto.ToCharArray().ToList();
         string _estrMem = EstructuraMembranas;
         List<string> _cadIni = CadenasIniciales.Select(ci => (string)ci).ToList();
-        List<Tuple<int, string, string, string, string, int>> _reg = Reglas.Select(ri => Tuple.Create(ri.M, ri.Input, ri.T_Here,ri.T_in,ri.T_out, ri.Priority)).ToList();
+        List<Tuple<int, string, string, string, string, int, bool>> _reg = Reglas.Select(ri => Tuple.Create(ri.M, ri.Input, ri.T_Here,ri.T_in,ri.T_out, ri.Priority, ri.IsDissolution)).ToList();
         PSystem = new PSystem(alfabeto: _alf,
                             estructuraMembranas: _estrMem,
                             cadenasIniciales: _cadIni,
