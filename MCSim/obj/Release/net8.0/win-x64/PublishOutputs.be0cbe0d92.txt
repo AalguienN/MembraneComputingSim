@@ -1,0 +1,5 @@
+C:\Users\adri3\Desktop\universidad\NatComp\MembraneComputingSim\MCSim\publish\win-x64\MCSim.pdb
+C:\Users\adri3\Desktop\universidad\NatComp\MembraneComputingSim\MCSim\publish\win-x64\av_libglesv2.dll
+C:\Users\adri3\Desktop\universidad\NatComp\MembraneComputingSim\MCSim\publish\win-x64\libHarfBuzzSharp.dll
+C:\Users\adri3\Desktop\universidad\NatComp\MembraneComputingSim\MCSim\publish\win-x64\libSkiaSharp.dll
+C:\Users\adri3\Desktop\universidad\NatComp\MembraneComputingSim\MCSim\publish\win-x64\MCSim.exe
